@@ -1,0 +1,66 @@
+AIL FROM: <jeffay@cs.unc.edu> mail-from-cmd
+MAILFROM: <jeffay@cs.unc.edu> SP
+MAIL ROM: <jeffay@cs.unc.edu> mail-from-cmd
+MAIL FROM:f<jeffay@cs.unc.edu> path
+MAIL FROM: jeffay@cs.unc.edu> path
+MAIL FROM: <jeffay@cs.unc.edu path
+MAIL FROM: <jeffaycs.unc.edu> mailbox
+MAIL FROM: <jeffay@csuncedu> sender ok
+MAIL FROM: <jeffaycsuncedu> mailbox
+MAIL FROM: <jeffay@cs.unc.edu> sender ok
+MAIL FROM: <@cs.unc.edu> char
+MAIL FROM: <1@cs.unc.edu> sender ok
+MAIL FROM: <\\@cs.unc.edu> char
+MAIL FROM: <jeffay@> letter
+MAIL FROM: <jeffay@cs.unc.edu>fd CRLF
+MAIL FROM: <jeffay@cs.unc.edu>\ CRLF
+MAIL FROM: <jeffay@cs@.unc.edu> path
+MAIL FROM: @jeffay@cs.unc.edu> path
+MAIL FROM: <jeffay@cs.unc.edu>@ CRLF
+MAIL FROM: <jeffay@1cs.unc.edu> letter
+MAIL FROM: <> char
+MAIL FROM: < char
+MAIL FROM: <aasdfasdf mailbox
+MAIL FROM: <aasdfasdf; mailbox
+MAIL FROM: <aasdfasdf;asdf mailbox
+
+
+<mail-from-cmd> ::= “MAIL” <whitespace> “FROM:” <nullspace> <reverse-path> <nullspace> <CRLF>
+
+<whitespace> ::= <SP> | <SP> <whitespace>
+
+<SP> ::= the space or tab character
+
+<nullspace> ::= <null> | <whitespace>
+
+<null> :== no character
+
+<reverse-path> ::= <path>
+ 
+<path> ::= "<" <mailbox> ">"
+
+<mailbox> ::= <local-part> "@" <domain>
+
+<local-part> ::= <string>
+
+<string> ::= <char> | <char> <string>
+
+<char> ::= any one of the printable 128 ASCII characters, but not any of <special> or <SP>
+
+<domain> ::= <element> | <element> "." <domain>
+
+<element> ::= <letter> | <name>
+ 
+<name> ::= <letter> <let-dig-str>
+ 
+<letter> ::= any one of the 52 alphabetic characters A through Z in upper case and a through z in lower case
+ 
+<let-dig-str> ::= <let-dig> | <let-dig> <let-dig-str>
+ 
+<let-dig> ::= <letter> | <digit>
+ 
+<digit> ::= any one of the ten digits 0 through 9
+ 
+<CRLF> ::= the newline character
+ 
+<special> ::= "<" | ">" | "(" | ")" | "[" | "]" | "\" | "." | "," | ";" | ":" | "@" | """

@@ -1,0 +1,25 @@
+AIL FROM: <jeffay@cs.unc.edu>
+MAILFROM: <jeffay@cs.unc.edu>
+MAIL ROM: <jeffay@cs.unc.edu>
+MAIL FROM:f<jeffay@cs.unc.edu>
+MAIL FROM: jeffay@cs.unc.edu>
+MAIL FROM: <jeffay@cs.unc.edu
+MAIL FROM: <jeffaycs.unc.edu>
+MAIL FROM: <jeffay@csuncedu>
+MAIL FROM: <jeffaycsuncedu>
+MAIL FROM: <jeffay@cs.unc.edu>
+MAIL FROM: <@cs.unc.edu>
+MAIL FROM: <1@cs.unc.edu>
+MAIL FROM: <\\@cs.unc.edu>
+MAIL FROM: <jeffay@>
+MAIL FROM: <jeffay@cs.unc.edu>fd
+MAIL FROM: <jeffay@cs.unc.edu>\
+MAIL FROM: <jeffay@cs@.unc.edu>
+MAIL FROM: @jeffay@cs.unc.edu>
+MAIL FROM: <jeffay@cs.unc.edu>@
+MAIL FROM: <jeffay@1cs.unc.edu>
+MAIL FROM: <>
+MAIL FROM: <
+MAIL FROM: <aasdfasdf
+MAIL FROM: <aasdfasdf;
+MAIL FROM: <aasdfasdf;asdf

@@ -28,26 +28,28 @@ def isMailFromCMD(line):
 	if line[index:index+5] != 'FROM:':
 		return -13
 
-	# <nullspace>
+	# <nullspace>: Goal is to just go as afar as there is whitespace
 	index = index + 5
-	leftArrowIndex = line.find('<')
+	isNS1 = 0
+	nsLenTested = 0
 
-	if(leftArrowIndex < index):
-		return -11
+	while isNS1 >= 0:
+		nsLenTested += 1
+		isNS1 = isNullSpace(line[index:index+nsLenTested])
 
-	isNS1 = isNullSpace(line[index:leftArrowIndex])
-
-	if isNS1 < 0:
-		return isNS1
-
-	# <reverse-path>
-	index = leftArrowIndex
-	rightArrowIndex = line.find('>')
-
-	if(rightArrowIndex < index):
+	if line[index+nsLenTested-1] != '<':
 		return -9
 
-	isRP = isReversePath(index:rightArrowIndex)
+
+	# <reverse-path>
+	index = index+nsLenTested-1
+	rightArrowIndex = line.find('>')
+
+	if(rightArrowIndex == -1):
+		return isReversePath(line[index:])
+	
+	# There is a right arrow, wahoo
+	isRP = isReversePath(line[index:rightArrowIndex+1])
 
 	if isRP < 0:
 		return isRP
@@ -56,21 +58,14 @@ def isMailFromCMD(line):
 	index = rightArrowIndex + 1
 	newlineIndex = line.find('\n')
 
-	if(newlineIndex < index):
-		return -11
-
 	isNS2 = isNullSpace(line[index:newlineIndex])
 
+	# If there's anything after the path, throw a CRLF error
 	if isNS2 < 0:
-		return isNS2
+		return -16
 
-	# <CRLF> -- Already found this in previous step, so I can return ok!
+	# Sender ok
 	return -14
-
-
-
-
-
 
 
 # <whitespace> ::= <SP> | <SP> <whitespace>
@@ -119,32 +114,79 @@ def isReversePath(strng):
  
 # <path> ::= "<" <mailbox> ">"
 def isPath(strng):
-	if len(strng) < 2:
+	if len(strng) < 1:
 		return -9
 
-	if strng[:1] != '<' or strng[-1:] != '>':
+	if strng[:1] != '<':
 		return -9
 
-	return 1 + isMailbox[1:-1] + 1
+	if len(strng) == 1:
+		return -7
 
-# <mailbox> ::= <local-part> "@" <domain>
+	mailboxStr = strng[1:]
+	if isMailbox(mailboxStr) > 0:
+		return -9
+
+	mailboxStr = strng[1:-1]
+	isM = isMailbox(mailboxStr)
+
+	if isM < 0:
+		if startsWithMailbox(mailboxStr):
+			return -9
+		else:
+			return isM
+
+	if strng[-1:] != '>':
+		return -9
+
+	return 1 + isM + 1
+
+# Tells me if the string starts with a valid mailbox
+def startsWithMailbox(strng):
+	foundMailbox = False
+
+	lenChecked = 0
+
+	while foundMailbox == False and lenChecked < len(strng):
+		lenChecked += 1
+
+		if isMailbox(strng[0:lenChecked]) > 0:
+			foundMailbox = True
+
+	return foundMailbox
+
+
+# <mailbox> ::= <local-part> "@" <domain>: Find whole applicable Local Part, then check if @ is next, then find whole Domain?
 def isMailbox(strng):
-	atIndex = strng.find('@')
+	index = 0
+	isLP = 0
 
-	if(atIndex < 0):
+	if len(strng) == 0:
+		return -7
+
+	while isLP >= 0 and index < len(strng):
+		index += 1
+		isLP = isLocalPart(strng[0:index])
+	
+	index -= 1
+
+	if index == 0:
+		return -7
+
+	if index == len(strng):
 		return -8
 
-	isLP = isLocalPart(strng[:atIndex])
+	if strng[index] != '@':
+		return -8
 
-	if isLP < 0:
-		return isLP
+	domainStr = strng[index+1:]
 
-	isD = isDomain(strng[atIndex+1:])
+	isD = isDomain(domainStr)
 
 	if isD < 0:
 		return isD
 
-	return isLP + 1 + isD 
+	return index + isD 
 
 # <local-part> ::= <string>
 def isLocalPart(strng):
@@ -169,7 +211,14 @@ def isString(strng):
 
 # <char> ::= any one of the printable 128 ASCII characters, but not any of <special> or <SP>
 def isChar(char):
-	return (1 if (ord(char) < 128 and (not isSpecial(char)) and (not isSP(char))) else -7)
+	if isSpecial(char) > 0:
+		return -7
+	if isSP(char) > 0:
+		return -7
+	if isNull(char) == 0:
+		return -7
+
+	return 1 if (ord(char) < 128) else 0
 
 # <domain> ::= <element> | <element> "." <domain>
 def isDomain(strng):
@@ -181,7 +230,7 @@ def isDomain(strng):
 	dotIndex = strng.find('.')
 
 	if(dotIndex < 0):
-		return -6
+		return isE
 
 	isStartE = isElement(strng[:dotIndex])
 
@@ -199,6 +248,9 @@ def isDomain(strng):
 # <element> ::= <letter> | <name>
 def isElement(strng):
 	isL = isLetter(strng)
+
+	if len(strng) <= 1:
+		return isL
 	
 	if isL > 0:
 		return isL
@@ -208,7 +260,7 @@ def isElement(strng):
 	if isN > 0:
 		return isN
 
-	return -5
+	return isN
 
  
 # <name> ::= <letter> <let-dig-str>
@@ -298,14 +350,29 @@ def isLetterDigitString(strng):
 	if isLD < 0:
 		return isLD
 
-	return isLD + isLetterDigitString(strng[1:])
+	isLDS = isLetterDigitString(strng[1:])
+
+	if isLDS < 0:
+		return isLDS
+
+	return isLD + isLDS
  
 # <let-dig> ::= <letter> | <digit>
 def isLetterDigit(char):
-	return isDigit(char) or isLetter(char) 
+	isD = isDigit(char)
+
+	if isD > 0:
+		return isD
+
+	isL = isLetter(char)
+
+	if isL > 0:
+		return isL
+
+	return -15
 
 # <digit> ::= any one of the ten digits 0 through 9
- def isDigit(char):
+def isDigit(char):
  	if char == '0':
  		return 1
  	if char == '1':
@@ -326,6 +393,7 @@ def isLetterDigit(char):
  		return 1
  	if char == '9':
  		return 1
+
  	return -3
 
 # <CRLF> ::= the newline character
@@ -392,3 +460,7 @@ def responseCodes(num):
 		return 'ERROR -- mail-from-cmd'
 	if num == -14:
 		return 'Sender ok'
+	if num == -15:
+		return 'ERROR - let-dig'
+	if num == -16:
+		return 'ERROR - CRLF'

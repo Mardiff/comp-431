@@ -12,6 +12,6 @@ from SMTP_Validity import isMailFromCMD, responseCodes
 
 for line in sys.stdin:
 	
-	print(line)
+	sys.stdout.write(line)
 
-	print(responseCodes(checkSMTPValidity(line)))
+	sys.stdout.write(responseCodes(isMailFromCMD(line)) + '\n')
