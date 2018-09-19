@@ -1,3 +1,99 @@
+# <end-data-cmd> ::= “.” <CRLF>
+def isEndData(line):
+	if len(line) != 2:
+		return -20
+
+	if line[0] != '.'  or line[1] != '\n':
+		return -20
+
+	return -14
+
+# <data-cmd> ::= “DATA” <nullspace> <CRLF>
+def isData(line):
+	if len(line) < 4:
+		return -20
+
+	if line[0:4] != 'DATA':
+		return -20
+
+	line = line[4:].lstrip()
+
+	if len(line) > 0:
+		return -20
+
+	return -14
+
+# <rcpt-to-cmd> ::= “RCPT” <whitespace> “TO:” <nullspace> <forward-path> <nullspace> <CRLF>
+def isRCPTToCMD(line):
+	# “RCPT”
+	if len(line) < 4:
+		return -17
+
+	if line[0:4] != 'RCPT':
+		return -17
+
+	line = line[4:]
+
+	# <whitespace>
+	isW = 0
+	wsLenTested = 0
+
+	while isW >= 0:
+		wsLenTested += 1
+		isW = isWhitespace(line[0:wsLenTested])
+
+	if wsLenTested == 1:
+		return -17
+
+	line = line[wsLenTested-1:]
+
+	# “TO:”
+	if len(line) < 3:
+		return -17
+
+	if line[0:3] != 'TO:':
+		return -17
+
+	line = line[3:]
+
+	# <nullspace>
+	line = line.lstrip()
+
+	if len(line) == 0:
+		return -9
+
+	if line[0] != '<':
+		return -9
+
+	# <forward-path>
+	rightArrowIndex = line.find('>')
+
+	if(rightArrowIndex == -1):
+		return isForwardPath(line)
+	
+	# There is a right arrow, wahoo
+	isFP = isForwardPath(line[:rightArrowIndex+1])
+
+	if isFP < 0:
+		return isFP
+
+	# <nullspace>
+	line = line[rightArrowIndex + 1:]
+	index = 0
+
+	line = line.lstrip()
+
+	if len(line) != 0:
+		return -16
+
+	# Sender ok
+	return -14
+
+# <forward-path> ::= <path>
+def isForwardPath(strng):
+	return isPath(strng)
+
+# <mail-from-cmd> ::= “MAIL” <SP> “FROM:” <reverse-path> <CRLF>
 def isMailFromCMD(line):
 	if len(line) < 4:
 		return -13
@@ -13,7 +109,7 @@ def isMailFromCMD(line):
 		isW = isWhitespace(line[index:index+wsLenTested])
 
 	if wsLenTested == 1:
-		return isW
+		return -13
 
 	# FROM:
 	index = index + wsLenTested - 1
@@ -24,20 +120,20 @@ def isMailFromCMD(line):
 		return -13
 
 	# <nullspace>: Goal is to just go as afar as there is whitespace
-	index = index + 5
-	isNS1 = 0
-	nsLenTested = 0
+	line = line[index + 5:]
+	index = 0
 
-	while isNS1 >= 0:
-		nsLenTested += 1
-		isNS1 = isNullSpace(line[index:index+nsLenTested])
+	line = line.lstrip()
 
-	if line[index+nsLenTested-1] != '<':
+	if len(line) == 0:
 		return -9
 
+	if line[0] != '<':
+		return -9
 
 	# <reverse-path>
-	index = index+nsLenTested-1
+	index = 0
+
 	rightArrowIndex = line.find('>')
 
 	if(rightArrowIndex == -1):
@@ -50,13 +146,12 @@ def isMailFromCMD(line):
 		return isRP
 
 	# <nullspace>
-	index = rightArrowIndex + 1
-	newlineIndex = line.find('\n')
+	line = line[rightArrowIndex + 1:]
+	index = 0
 
-	isNS2 = isNullSpace(line[index:newlineIndex])
+	line = line.lstrip()
 
-	# If there's anything after the path, throw a CRLF error
-	if isNS2 < 0:
+	if len(line) != 0:
 		return -16
 
 	# Sender ok
@@ -84,20 +179,6 @@ def isWhitespace(strng):
 def isSP(char):
 	return (1 if (char == ' ' or char == '\t') else -12)
 
-
-# <nullspace> ::= <null> | <whitespace>
-def isNullSpace(strng):
-	isN = isNull(strng)
-
-	if isN == 0:
-		return isN
-
-	isW = isWhitespace(strng)
-
-	if isW > 0:
-		return isW
-
-	return -11
 
 # <null> :== no character
 def isNull(strng):
@@ -391,10 +472,6 @@ def isDigit(char):
 
  	return -3
 
-# <CRLF> ::= the newline character
-def isCRLF(char):
-	return (1 if char == '\n' else -2)
-
 # <special> ::= "<" | ">" | "(" | ")" | "[" | "]" | "\" | "." | "," | ";" | ":" | "@" | """
 def isSpecial(char):
 	if char == '<':
@@ -454,8 +531,12 @@ def responseCodes(num):
 	if num == -13:
 		return 'ERROR -- mail-from-cmd'
 	if num == -14:
-		return 'Sender ok'
+		return '250 OK'
 	if num == -15:
 		return 'ERROR - let-dig'
 	if num == -16:
 		return 'ERROR - CRLF'
+	if num == -17:
+		return 'ERROR - rcpt-to-cmd'
+	if num == -20:
+		return 'ERROR - data-cmd'
