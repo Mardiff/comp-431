@@ -1,4 +1,4 @@
-# <end-data-cmd> ::= “.” <CRLF>
+# <end-data-cmd> ::= "." <CRLF>
 def isEndData(line):
 	if len(line) != 2:
 		return -20
@@ -8,7 +8,7 @@ def isEndData(line):
 
 	return -14
 
-# <data-cmd> ::= “DATA” <nullspace> <CRLF>
+# <data-cmd> ::= "DATA" <nullspace> <CRLF>
 def isData(line):
 	if len(line) < 4:
 		return -20
@@ -16,16 +16,23 @@ def isData(line):
 	if line[0:4] != 'DATA':
 		return -20
 
-	line = line[4:].lstrip()
+	# Checking for the stupid DATAX thing
+	line = line[4:]
+
+	if len(line) > 1:
+		if isSP(line[0]) < 0:
+			return -20
+
+	line = line.lstrip()
 
 	if len(line) > 0:
-		return -20
+		return -16
 
 	return -14
 
-# <rcpt-to-cmd> ::= “RCPT” <whitespace> “TO:” <nullspace> <forward-path> <nullspace> <CRLF>
+# <rcpt-to-cmd> ::= "RCPT" <whitespace> "TO:" <nullspace> <forward-path> <nullspace> <CRLF>
 def isRCPTToCMD(line):
-	# “RCPT”
+	# "RCPT"
 	if len(line) < 4:
 		return -17
 
@@ -47,7 +54,7 @@ def isRCPTToCMD(line):
 
 	line = line[wsLenTested-1:]
 
-	# “TO:”
+	# "TO:"
 	if len(line) < 3:
 		return -17
 
@@ -93,7 +100,7 @@ def isRCPTToCMD(line):
 def isForwardPath(strng):
 	return isPath(strng)
 
-# <mail-from-cmd> ::= “MAIL” <SP> “FROM:” <reverse-path> <CRLF>
+# <mail-from-cmd> ::= "MAIL" <SP> "FROM:" <reverse-path> <CRLF>
 def isMailFromCMD(line):
 	if len(line) < 4:
 		return -13
@@ -109,6 +116,9 @@ def isMailFromCMD(line):
 		isW = isWhitespace(line[index:index+wsLenTested])
 
 	if wsLenTested == 1:
+		return -13
+
+	if wsLenTested > 2 and ((wsLenTested - 1) % 4 != 0):
 		return -13
 
 	# FROM:

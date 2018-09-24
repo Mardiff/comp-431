@@ -1,9 +1,11 @@
-MAIL FROM: <jeffay@cs.unc.edu>
-RCPT TO: <ivysat@cs.unc.edu>
-RCPT TO: <pozefsky@cs.unc.edu>
+MAIL FROM: <ivysat@live.unc.edu>
+RCPT TO: <jeffay@cs.unc.edu>
+RCPT TO: <jeffay@cs.unc.edu>
+DATA X
+MAIL FROM: <ivysat@live.unc.edu>
+RCPT TO: <jeffay@cs.unc.edu>
+RCPT TO: <jeffay@cs.unc.edu>
 DATA
-Hey Ivy, do you really think we should use SMTP as a class 
-project in COMP 431 this year? The smart students are going to 
-figure out automated ways to use this project to send 
-anonymous SPAM to the world!
+Man, we really should have started this sooner
+Debugging can be really hard
 .
