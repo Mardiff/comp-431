@@ -1,0 +1,25 @@
+MAIL FROM: <ivysat@live.unc.edu>
+250 OK
+RCPT TO: <jeffay@cs.unc.edu>
+250 OK
+DATA
+354 OK
+Hey Kevin, do you really think we should use SMTP as a class
+project in COMP 431 this year? The smart students are going to
+figure out automated ways to send anonymous SPAM to the world!
+.
+250 OK
+MAIL FROM: <student-who-wants-to-get-an-A@cs.unc.edu>
+250 OK
+RCPT TO: <jeffay@cs.unc.edu>
+250 OK
+DATA
+354 OK
+Dr. J, I just wanted to tell you that I think these SMTP
+programming assignments are the coolest thing! I really like
+learning how a real-life protocol for a real-life Internet service
+really works.
+
+Thanks!
+.
+250 OK
